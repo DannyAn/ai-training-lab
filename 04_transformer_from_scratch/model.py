@@ -151,8 +151,12 @@ class Transformer(nn.Module):
 
 
 def generate_square_subsequent_mask(sz: int, device: torch.device) -> torch.Tensor:
-    """生成自回归的因果掩码"""
-    return torch.triu(torch.full((sz, sz), float("-inf"), device=device), diagonal=1)
+    """生成自回归的因果掩码：下三角 True=允许看自身及过去，上三角 False=屏蔽未来。
+
+    约定必须与 MultiHeadAttention 里 masked_fill(mask == 0, -inf) 对齐--0/False 表示屏蔽。
+    (旧版返回 -inf 的"加法约定"，与本模型 masked_fill 用法冲突，会让最后一行全 -inf -> softmax 产生 NaN)
+    """
+    return torch.tril(torch.ones(sz, sz, dtype=torch.bool, device=device))
 
 
 if __name__ == "__main__":
