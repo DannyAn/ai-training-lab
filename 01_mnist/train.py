@@ -55,10 +55,10 @@ def main():
     )
 
     # 【记忆】训练循环四步（每个 batch 重复一次，trainer.fit() 内部就是它）：
-    #   1. forward : out = model(x)        前向算预测
-    #   2. loss    : l = criterion(out, y) 算预测和真值的误差
-    #   3. backward: l.backward()          反向传播求每个参数的梯度
-    #   4. step    : optimizer.step()      用梯度更新参数；下次前要 zero_grad() 清掉旧梯度
+    #   1. forward : out = model(x)        前向算预测 - 理解重点：输入图片 → 输出 10 个分数
+    #   2. loss    : loss = criterion(out, y) 计算损失 - 算预测和真值的误差。理解重点：比较分数和真实标签的差距。
+    #   3. backward: loss.backward()          反向传播 - 反向传播求每个参数的梯度，自动计算每个参数对损失的梯度。
+    #   4. step    : optimizer.step()      更新参数 - 用梯度更新参数；下次前要 zero_grad() 清掉旧梯度
     history = trainer.fit()
 
     print(f"\nDone! Best val acc: {max(history['val_acc']):.2%}")
@@ -78,13 +78,20 @@ def main():
     infer_model = MNISTCNN().to(device)
     # 【记忆·安全】torch.load 默认走 pickle，加载不可信 .pt 可执行任意代码(供应链/反序列化漏洞)。
     #   只加载自己训练的权重时加 weights_only=True，限定只反序列化张量，从根上杜绝代码执行。
+    # 把训练好的“知识”装进去
     infer_model.load_state_dict(torch.load(save_path, map_location=device, weights_only=True))
+    # 切换大脑到“考试模式”（关闭随机失活等）
     infer_model.eval()  # 【记忆】推理必须调 eval()：关掉 Dropout、固定 BatchNorm 统计量
 
+    # 从验证集里抽一叠试卷（一个 batch）
     x, y = next(iter(val_loader))  # 借一批验证数据当示例
     x = x.to(device)
+
+    # 禁止 PyTorch 打草稿（不构建计算图，省显存）
     with torch.no_grad():  # 【记忆】推理不需要梯度，no_grad 省显存、加速
+        # 这里是真正的推理：图片输入 → 输出10个分数 → 取最高分对应的数字
         preds = infer_model(x).argmax(dim=1)  # argmax 取概率最大的类别
+
     print(f"推理示例 - 预测: {preds[:8].tolist()}  真实: {y[:8].tolist()}")
 
     # 【练习】建议动手试一遍，建立直觉（改完直接 python 01_mnist/train.py 重跑）：

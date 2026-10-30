@@ -18,8 +18,11 @@ bitsandbytes>=0.41.0
 accelerate>=0.24.0
 
 # RAG
-langchain>=0.1.0
-chromadb>=0.4.22
+langchain>=1.3.14
+langchain-chroma>=1.1.0
+langchain-huggingface>=1.2.2
+langchain-text-splitters>=1.1.2
+chromadb>=1.5.9
 sentence-transformers>=2.2.0
 
 # Utility

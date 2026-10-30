@@ -46,7 +46,6 @@ class MLP(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.net(x)
 
-
 class GPTBlock(nn.Module):
     def __init__(self, d_model: int = 384, n_heads: int = 6, dropout: float = 0.1):
         super().__init__()

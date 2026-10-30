@@ -21,6 +21,10 @@ TOKENIZER_DIR = "./06_bert_finetune/tokenizer"
 
 
 def main():
+    # 【记忆】固定随机种子（seed=42）
+    #   让随机初始化、打乱顺序、Dropout 等行为在每次运行时都从同一个起点开始，
+    #   这样实验更容易复现，结果也更稳定。
+    #   注意：42 只是一个常见示例值，不是唯一正确值。
     set_seed(42)
     device = get_device()
     print(f"Device: {device}")
@@ -28,6 +32,7 @@ def main():
     # 【记忆】SST-2：GLUE 里的句子情感二分类，BERT 微调的经典 benchmark。
     #   新版 datasets(5.x) 要求"命名空间/名字"格式；旧的 load_dataset("glue",...) 脚本式加载已废弃会报错。
     dataset = load_dataset("nyu-mll/glue", "sst2")
+    
     # 【记忆】tokenizer 把文本变成模型能吃的 input_ids + attention_mask。
     #   BERT 用 WordPiece 子词分词；padding="max_length" 统一到 128 方便批量。
     tokenizer = load_tokenizer()
